@@ -186,7 +186,7 @@ jobs:
         with:
           node-version: '18'
       - name: Run Security Audit
-        run: node security-audit.js src/**/*.js
+        run: node security-audit.cjs src/**/*.cjs
 ```
 
 ### Pre-commit Hook
@@ -195,15 +195,23 @@ jobs:
 #!/bin/sh
 # .husky/pre-commit
 
-node security-audit.js $(git diff --cached --name-only --diff-filter=ACM | grep '\.js$')
+node security-audit.cjs $(git diff --cached --name-only --diff-filter=ACM | grep '\.js$')
 ```
 
 ## Limitations
 
 1. **Static Analysis Only**: Does not execute code or test runtime behavior
-2. **Pattern-Based**: May miss complex or obfuscated vulnerabilities
+2. **Pattern-Based**: May miss complex or obfuscated vulnerabilities; may produce false positives for sanitized code
 3. **Context-Limited**: Cannot analyze external dependencies without source
 4. **No Flow Analysis**: Does not track data flow through the application
+5. **Simple Pattern Matching**: Patterns are intentionally broad - findings marked as "THEORETICAL" require human review to determine if they are actual vulnerabilities
+
+### Understanding False Positives
+
+This tool uses simple pattern matching and may flag safe code. For example:
+- `innerHTML = sanitizedValue` will be flagged even if sanitization is proper
+- `if (key === "__proto__")` security checks will be flagged as prototype pollution
+- Always review findings in their full context
 
 ## Best Practices
 

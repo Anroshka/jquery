@@ -28,12 +28,20 @@ class SecurityAuditFramework {
 	/**
 	 * Core Principle: Grounded Analysis
 	 * No hallucinations - build hypotheses ONLY on provided code
+	 * 
+	 * NOTE: This is a simple pattern-based scanner. It may generate false positives
+	 * when patterns match sanitized or safe code. Always review findings in context.
+	 * For production use, consider adding:
+	 * - Data flow analysis to track sanitization
+	 * - Context-aware parsing (AST-based)
+	 * - Configurable severity levels
 	 */
 	analyzeFile(filePath, content) {
 		this.files_analyzed.push(filePath);
 		const vulnerabilities = [];
 
 		// Check for XSS vulnerabilities
+		// Note: These patterns are intentionally broad to catch potential issues
 		const xssPatterns = [
 			{ pattern: /\.html\s*\(/g, type: "XSS", desc: "HTML injection via .html()" },
 			{ pattern: /\.append\s*\(/g, type: "XSS", desc: "Potential XSS via .append()" },
@@ -183,6 +191,12 @@ class SecurityAuditFramework {
 		// In a real audit, this would check for mitigations
 		// For now, we mark patterns as theoretical unless confirmed
 		
+		// Check if the line is a comment (starts with // or /* after trimming)
+		const trimmedCode = vuln.code.trim();
+		if (trimmedCode.startsWith("//") || trimmedCode.startsWith("/*")) {
+			return "COMMENTED_OUT";
+		}
+		
 		const highConfidence = ["eval(", "innerHTML ="];
 		const isHighConfidence = highConfidence.some(pattern => 
 			vuln.code.includes(pattern)
@@ -190,8 +204,6 @@ class SecurityAuditFramework {
 
 		if (isHighConfidence) {
 			return "CONFIRMED";
-		} else if (vuln.code.includes("//") || vuln.code.includes("/*")) {
-			return "COMMENTED_OUT";
 		} else {
 			return "THEORETICAL (NEEDS_CONTEXT)";
 		}
@@ -227,7 +239,7 @@ class SecurityAuditFramework {
 			});
 		} else if (this.hypotheses.length === 0) {
 			console.log("✅ SECURE");
-			console.log("\nVERDICT: СИСТЕМА УСТОЙЧИВА К ВНЕШНИМ АТАКАМ В ДАННОМ СЕГМЕНТЕ");
+			console.log("\nVERDICT: SYSTEM IS RESISTANT TO EXTERNAL ATTACKS IN THIS SEGMENT");
 			console.log("No vulnerabilities detected in analyzed code segments.");
 		} else {
 			console.log("✅ MITIGATED");
