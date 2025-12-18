@@ -89,7 +89,8 @@ class SecurityAuditFramework {
 		const missing = [];
 
 		targetFiles.forEach(file => {
-			const fullPath = path.join(process.cwd(), file);
+			// Handle both absolute and relative paths
+			const fullPath = path.isAbsolute(file) ? file : path.join(process.cwd(), file);
 			if (fs.existsSync(fullPath)) {
 				const content = fs.readFileSync(fullPath, 'utf-8');
 				const vulns = this.analyzeFile(file, content);

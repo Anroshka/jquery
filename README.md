@@ -6,6 +6,14 @@ Meeting minutes can be found at [meetings.jquery.org](https://meetings.jquery.or
 
 The latest version of jQuery is available at [https://jquery.com/download/](https://jquery.com/download/).
 
+## Security Audit Framework
+
+jQuery includes an **Evidence-Based Security Research Framework** implementing the M.A.P.P.X. methodology. See [SECURITY-AUDIT-README.md](SECURITY-AUDIT-README.md) for details.
+
+```bash
+npm run audit:core  # Run security audit on core files
+```
+
 ## Version support
 
 | Version | Branch     | Status   |
